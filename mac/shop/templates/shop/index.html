@@ -1,0 +1,252 @@
+{% extends 'shop/basic.html' %}
+{% block title %} Welcome to My Awesome Cart! {% endblock %}
+{% block css %}
+.col-md-3 {
+    display: inline-block;
+    margin-left: -4px;
+}
+
+.col-md-3 img {
+    width: 150px;
+    height: 150px;
+}
+body .carousel-indicator li {
+    background-color: blue;
+}
+body .carousel-indicators {
+    bottom: -40px;
+}
+
+.carousel-indicators [data-bs-target] {
+    background-color: #6799e3;
+}
+
+.carousel-indicators .active {
+    background-color: blue;
+}
+body .carousel-control-prev-icon,
+body .carousel-control-next-icon{
+    background-color: black;
+    opacity: 0.5;
+}
+body .carousel-control-prev-icon{
+    position: relative;
+    right: 150px;
+}
+body .carousel-control-next-icon{
+    position: relative;
+    left: 150px;
+}
+.carousel-control-prev,
+.carousel-control-next{
+    bottom: 25%;
+}
+body .no-padding {
+    padding-left: 0;
+    padding-right: 0;
+}
+{% endblock %}
+{% block body%}
+{% load static %}
+<!--  Slideshow Container Starts here  -->
+{% for product, range, slides in allProducts %}
+<div class="container">
+    <!--Slideshow Starts here -->
+    <h3 class="my-4">{{product.0.product_category}}</h3>
+    <div id="demo{{forloop.counter}}" class="col carousel slide my-3" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#demo{{forloop.counter}}" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button> {% for i in range %}
+            <button type="button" data-bs-target="#demo{{forloop.parentloop.counter}}" data-bs-slide-to="{{i}}"></button> {% endfor %}
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <!--Slicing product from 1-->
+                {% for i in product %}
+                <div class="col-xs-3 col-sm-3 col-md-3">
+                    <div class="card align-items-center" style="width: 18rem; border: 0px;">
+                        <img src="/media/{{i.product_img}}" class="card-img-top" alt="{{i.product_name}}">
+                        <div class="card-body text-center">
+                            <h6 class="card-title" id="namepid{{i.id}}">{{i.product_name}}</h6>
+                            <h6 class="card-title">Buy at: &#8377; <strong id="pricepid{{i.id}}">{{i.product_price}}</strong> only</h6>
+                            <p class="card-text" id="descpid{{i.id}}">{{i.product_desc|slice:":25"}}{% if i.product_desc|length > 25 %}...{% endif %}</p>
+
+                            <span id="divpid{{i.id}}" class="divpid">
+                                <button id="pid{{i.id}}" class="btn btn-warning cart">Add to Cart</button>
+                            </span>
+                            <a href="product/{{i.id}}"><button id="vid{{i.id}}" class="btn btn-primary cart">View Product</button></a>
+                        </div>
+                        <!-- card body text end-->
+                    </div>
+                    <!-- card body items end-->
+                </div>
+                <!-- col-xs-3 col-sm-3 col-md-3 end-->
+                {% if forloop.counter|divisibleby:4 and forloop.counter > 0 and not forloop.last %}
+            </div>
+            <div class="carousel-item">
+                {% endif %} {% endfor %}
+            </div>
+            <!--carousel inner-->
+        </div>
+        <!-- Left right controls -->
+        {% if product|length > 4 %}
+        <button class="carousel-control-prev" type="button" data-bs-target="#demo{{forloop.counter}}" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#demo{{forloop.counter}}" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button> {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+{% block js %}
+<script>
+    //Enabling and creating instance of popover
+    // Getting popcart by ID
+    var popcart = document.getElementById('popcart')
+    // Enabling popover
+    var popover = new bootstrap.Popover(popcart, 'data-bs-content')
+
+    // if cart is empty
+    if (localStorage.getItem('cart') == null) {
+        var cart = {};
+    }
+    // if cart is non-empty, then get the value of cart
+    else {
+        cart = JSON.parse(localStorage.getItem('cart'));
+        updateCart(cart);
+    }
+
+    // if person clicks on add to cart button
+    //jQuery starts here
+    // $('.cart').click(function() {
+    $('.divpid').on('click', 'button.cart', function() {
+        //console.log('clicked');
+        var prod_id = this.id.toString();
+
+        // If product already exists in cart
+        if (cart[prod_id] != undefined) {
+            let qty = cart[prod_id][0] + 1;
+        }
+
+        // If cart doesn't exist in cart
+        else {
+            let qty = 1;
+            let name = document.getElementById('name'+prod_id).innerHTML;
+            let price = document.getElementById('price'+prod_id).innerHTML;
+            let desc = document.getElementById('desc'+prod_id).innerHTML;
+            cart[prod_id] = [qty, name, price, desc];
+        }
+        updateCart(cart);
+    });
+
+    // If plus or minus button is clicked then change the cart as well as display value
+    $('.divpid').on('click', 'button.minus', function() {
+
+        // Getting id of item which is clicked and slicing 'minuspid' so we'll only have value of that product
+        id = this.id.slice(8, );
+
+        // Subtracting 1 from the value
+        cart['pid' + id][0] = cart['pid' + id][0] - 1;
+        cart['pid' + id][0] = Math.max(0, cart['pid' + id][0]);
+
+        // Updating value that is being shown between + and - buttons
+
+        // If user has decreased the quantity of product to 0 than replace the plus and minus button with Add to cart button and also remove the entry from cart
+        if(cart['pid'+ id][0]==0){
+            document.getElementById('divpid'+ id).innerHTML = `<button id="pid${id}" class="btn btn-warning cart">Add to Cart</button>`
+            delete cart['pid'+id];
+        }
+        else{
+            document.getElementById('valpid' + id).innerHTML = cart['pid' + id][0];
+        }
+        
+        // Updating cart as well
+        updateCart(cart);
+    });
+
+    $('.divpid').on('click', 'button.plus', function() {
+        // console.log('plus clicked');
+        id = this.id.slice(7, );
+
+        cart['pid' + id][0] = cart['pid' + id][0] + 1;
+
+        document.getElementById('valpid' + id).innerHTML = cart['pid' + id][0];
+        updateCart(cart);
+    });
+
+
+    // Clearing Cart
+
+    function clearCart() {
+        // Getting cart value from local storage
+        cart = JSON.parse(localStorage.getItem('cart'));
+
+        for (var item in cart) {
+            // Getting the division in which we have set plus and minus buttons(see updateCart function)
+            document.getElementById('div' + item).innerHTML = "<button id='" + item + "' class='btn btn-warning cart'>Add to Cart</button>";
+        }
+
+        localStorage.clear();
+        cart = {};
+        updateCart(cart);
+    }
+
+    // Updating Cart
+    function updateCart(cart) {
+        if (cart !== null) {
+            let quantity = 0;
+            for (item in cart) {
+                // Creating plus and minus buttons
+                document.getElementById('div' + item).innerHTML = "<button id='minus" + item + "' class='btn btn-danger minus'>-</button><span id='val" + item + "'> " + cart[item][0] + " </span><button id='plus" + item + "' class='btn btn-success plus'> + </button>";
+
+                quantity += cart[item][0];
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            document.getElementById('cart').innerHTML = quantity;
+
+            updatePopover(cart);
+        }
+    }
+    // updatePopover(cart);
+
+    // Updating Popover
+
+    function updatePopover(cart) {
+        popStr = "";
+        i = 1;
+
+        popStr = popStr + "<div class='my-2 mx-1'>";
+        for (item in cart) {
+            if (cart[item][0] !== 0) {
+                popStr = popStr + "<b>" + i + ". </b>";
+
+                popStr = popStr + document.getElementById('name' + item).innerHTML + " | <b>Qty:</b> " + cart[item][0] + "<br>";
+                i += 1;
+            }
+        }
+        // Adding Clear Cart and Checkout buttons
+
+        popStr = popStr + "</div> <a href='/shop/checkout'><button type='submit' class='btn btn-success btn-sm' id='checkout'>Checkout</button></a> <button type='submit' class='btn btn-danger btn-sm' id='clearCart' onclick='clearCart();'>Clear Cart</button>";
+
+        // console.log(popStr);
+
+        // Adding buttons in allowed list so that buttons can be added (escaping from sanitization)
+        var myDefaultAllowList = bootstrap.Tooltip.Default.allowList;
+        myDefaultAllowList.button = ['type', 'onclick'];
+        // myDefaultAllowList.a = ['href'];
+
+        // // Getting popcart by ID
+        // var popcart = document.getElementById('popcart')
+        // // Enabling popover
+        // var popover = new bootstrap.Popover(popcart, 'data-bs-content')
+        // Setting new value of popcart
+        popcart.setAttribute('data-bs-content', popStr);
+        // Showing the popover
+        popover.show();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'shop/basic.html' %}
+{% block title %} Track Order {% endblock %}
+{% block body %}
+<div class="container">
+    <!-- Track Form Starts -->
+    <div class="col my-4">
+        <h2>Track Your Order</h2>
+        <form class="row g-3" method="POST" action="#" id="trackerForm" name="trackerForm"> {% csrf_token %}
+            <div class="col-md-6">
+                <label for="orderId" class="form-label">Order ID: </label>
+                <input type="text" class="form-control" id="orderId" name="orderId" placeholder="Enter Your Order ID">
+            </div>
+            <div class="col-md-6">
+                <label for="email" class="form-label">Email-ID</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter Your Email-ID">
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-success">Track Now</button>
+            </div>
+        </form>
+    </div>
+    <!-- Track Form Ends -->
+    
+    <!-- Tracking Status Starts -->
+    <div class="col my-4">
+        <h2> Your Order Status: </h2>
+        <div class="my-4">
+            <ul class="list-group" id="items">
+            	<p>Enter Your Order ID and associated Email-ID to Track your order!</p>
+            </ul>
+        </div>
+    </div>
+    <!-- Tracking Status Ends -->
+
+    <!-- Order Details Starts -->
+    <div class="col my-4">
+        <h2> Your Order Details: </h2>
+        <div class="my-4">
+            <div id="order_items" class="my-4">
+        	</div>
+        </div>
+    </div>
+    <!-- Order Details Ends -->
+</div>
+{% endblock %}
+{% block js %}
+<script>
+$('#trackerForm').submit(function(event) {
+
+    $('#items').empty();
+    $('#order_items').empty();
+
+    formData = {
+        'orderId': $('input[name=orderId]').val(),
+        'email': $('input[name=email]').val(),
+        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+    };
+
+    $.ajax({
+            type: 'POST',
+            url: '/shop/tracker/',
+            data: formData,
+            encode: true
+        })
+
+        .done(function(data) {
+            // console.log(data);
+            data = JSON.parse(data);
+            // Getting Status Updates
+            updates = data[0];
+
+            if (data.length > 0 & data!={}) {
+                for (var i = 0; i < updates.length; i++) {
+                    let desc = updates[i]['desc'];
+                    let time = updates[i]['time'];
+
+                    let mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">${desc}<span class="badge bg-primary rounded-pill">Date: ${time}</span>
+					            </li>`;
+
+                    $('#items').append(mystr);
+
+
+                    // Showing order details
+		            var cart = JSON.parse(data[1]);
+		            var i = 1;
+		            var totalPrice = 0;
+		            for (var item in cart) {
+				        let qty = cart[item][0];
+				        let name = cart[item][1];
+				        let price = cart[item][2];
+				        let desc = cart[item][3];
+						totalPrice += qty*price;
+				       
+				        // Item Listing 
+				        let myItemDetailsStr = `<div class="list-group list-group-item list-group-item-action text-reset">
+					        <div class="d-flex w-100 justify-content-between">
+					                    <h5 class="mb-1"><strong>${i}. ${name}</strong></h5>
+					                    <big><strong>&#8377;${price}</strong></big>
+					                </div>
+					                <p class="mb-1">${desc}</p>
+					                <p>Quantity: <strong>${qty}</strong></p></div>`;
+					    i++;
+				        $('#order_items').append(myItemDetailsStr);
+				    }
+				    // Printing Total Price
+
+				    var totalStr = `<div class="list-group list-group-item list-group-item-action text-reset">
+				                    <div class="d-flex w-100 justify-content-between">
+				                        <h5 class="mb-1"><strong>Grand Total:</strong></h5>
+				                        <big><strong>&#8377;${totalPrice}</strong></big>
+				                    </div>
+				                </div>`;
+
+				    $('#order_items').append(totalStr);
+                }
+            } else {
+                let mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">Can't find the Order with the specified Order ID and Email. Please check them again!</li>`;
+
+                $('#items').append(mystr);
+                $('#order_items').append(mystr);
+            }
+            
+        });
+
+    event.preventDefault();
+});
+</script>
+{% endblock %}

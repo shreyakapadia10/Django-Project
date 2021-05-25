@@ -1,0 +1,21 @@
+{% extends 'shop/basic.html' %}
+{% block title %} Track Order {% endblock %}
+{% block body %}
+<div class="container">
+    <!-- Track Form Starts -->
+    {{response}}
+    <div class="col my-4">
+        <h2>Payment Status Regarding Your Order ID {{response.ORDERID}}</h2>
+
+        {% if response.RESPCODE == '01' %}
+            ORDER SUCCESS
+        {% else %}
+            ORDER FAILURE
+        {% endif %}
+
+    </div>
+    <!-- Track Form Ends -->
+</div>
+{% endblock %}
+{% block js %}
+{% endblock %}

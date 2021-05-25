@@ -1,0 +1,59 @@
+{% extends 'blog/basic.html' %}
+{% block title %} Welcome to My Awesome Cart's Blog! {% endblock %}
+
+{% block body%}
+  
+	<div class="container my-4">
+		<div class="row">
+    <div class="col-md-8">
+      <h3 class="pb-4 mb-4 fst-italic border-bottom">
+        {{ post.post_title }}
+      </h3>
+
+      <article class="blog-post">
+        <h2 class="blog-post-title">{{ post.post_heading0 }}</h2>
+        <p class="blog-post-meta">{{ post.post_publish_date }} by <a href="#">{{ post.post_author }}</a></p>
+
+        <p>{{ post.post_heading0_content }}</p>
+      
+        <h2>{{ post.post_heading1 }}</h2>
+        <p>{{ post.post_heading1_content }}</p>
+
+        <h2>{{ post.post_heading2 }}</h2>
+        <p>{{ post.post_heading2_content }}</p>
+
+        <div class="fb-like" data-href="http://127.0.0.1:8000/blog/blogpost/{{post.post_id}}" data-width="" data-layout="standard" data-action="like" data-size="large" data-share="true"></div>
+
+        <div class="fb-comments" data-href="http://127.0.0.1:8000/blog/blogpost/{{post.post_id}}" data-width="" data-numposts="5"></div>
+
+        <!-- <a href="{{ post.post_id|add:-1 }}" type="button" class="btn btn-primary"> 
+          Previous
+        </button></a>
+
+        <a href="{{ post.post_id|add:+1 }}" type="button" class="btn btn-primary"> 
+          Next
+        </button></a>
+ -->
+
+    </div>
+
+    <div class="col-md-4">
+      <div class="p-4 mb-3 bg-light rounded">
+        <h4 class="fst-italic">About</h4>
+        <p class="mb-0">My Awesome Cart is an <em>E-Commerece Website</em> using which you can order online items.</p>
+      </div>
+
+      <div class="p-4">
+        <h4 class="fst-italic">Contact Us</h4>
+        <ol class="list-unstyled">
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">Twitter</a></li>
+          <li><a href="#">Facebook</a></li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+	</div>
+
+{% endblock %}

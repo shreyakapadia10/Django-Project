@@ -1,0 +1,26 @@
+{% extends 'blog/basic.html' %}
+{% block title %} Welcome to My Awesome Cart's Blog! {% endblock %}
+
+{% block body %}
+<div class="container my-4">
+    <div class="row mb-2">
+    {% for post in allPosts %}
+    <div class="col-md-6">
+      <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <strong class="d-inline-block mb-2 text-primary">{{ post.post_heading0 }}</strong>
+          <h3 class="mb-0">{{ post.post_title }}</h3>
+          <div class="mb-1 text-muted">{{ post.post_publish_date }}</div>
+          <p class="card-text mb-auto">{{ post.post_heading0_content|slice:":25"}}{% if post.post_heading0_content|length > 25 %}...{% endif %}</p>
+          <a href="blogpost/{{ post.post_id }}" class="stretched-link">Continue reading</a>
+        </div>
+        <div class="col-auto d-none d-lg-block">
+            <img src="/media/{{ post.post_thumbnail }}" alt="{{ post.post_thumbnail }}" width="200" height="250">
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% endblock %}
